@@ -1,17 +1,19 @@
 var cx;
-var mouse = {x:0,y:0};
+var mouse = {x:0,y:0, rightclick: false,xprev: 0,yprev: 0};
 var points = [];
 var width = 800;
 var height = 800;
+var xshift = 0;
+var yshift = 0;
 
 function redraw(){
-	if(points.length > 1){
-		cx.clearRect(0,0,width,height);
+	cx.clearRect(0,0,width,height);
+	if(points.length > 0){
 		cx.beginPath();
-		cx.moveTo(points[points.length-1].x,points[points.length-1].y);
+		cx.moveTo(points[points.length-1].x+xshift,points[points.length-1].y+yshift);
 		for(var  i = 0; i < points.length; i++){
-			cx.lineTo(points[i].x,points[i].y);
-			cx.fillRect(points[i].x-1,points[i].y-1,3,3);
+			cx.lineTo(points[i].x+xshift,points[i].y+yshift);
+			cx.fillRect(points[i].x+xshift-1,points[i].y+yshift-1,3,3);
 		}
 		cx.stroke();
 	}
@@ -71,33 +73,60 @@ $(document).ready(function(){
 			var howFarDown = evnt.target.offsetTop+1;
 			mouse.x = mouse.x-howFarRight;
 			mouse.y = mouse.y-howFarDown;
+			if(mouse.rightclick){
+				xshift += mouse.x-mouse.xprev
+				yshift += mouse.y-mouse.yprev;
+				mouse.xprev = mouse.x;
+				mouse.yprev = mouse.y;
+			}
 		})
 		.mousedown(function(evnt){
 			switch(evnt.which){
 				case 1:
-					points.push({x:mouse.x,
-								y:mouse.y})
-					break;
-				case 2:
-					var lefts = $("#leftnums").val().split(",") || [];
-					var rights = $("#rightnums").val().split(",") || [];
-					var mid = parseFloat($("#selfnum").val());
-					for(var i = 0; i < lefts.length; i++){
-						lefts[i] = parseFloat(lefts[i]);
-					}
-					for(var i = 0; i < rights.length; i++){
-						rights[i] = parseFloat(rights[i]);
-					}
-					if(!lefts[0]) lefts = [];
-					if(!rights[0]) rights = [];
-					//setInterval(average_points,100);
-					average_points(lefts,mid,rights);
+					points.push({x:mouse.x-xshift,
+								y:mouse.y-yshift})
 					break;
 				case 3:
-					middlepoints();
+					mouse.rightclick = true;
+					mouse.xprev = mouse.x;
+					mouse.yprev = mouse.y;
 					break;
 			}
+		})
+		.mouseup(function(evnt){
+			switch(evnt.which){
+				case 3:
+					mouse.rightclick = false;
+					break;
+			}
+		})
+		.bind('contextmenu', function(e){ //Disble context menu!
+			return false;
 		});
 		
-	setInterval(redraw,100);
+	$("#average_button").click(function(){
+		var lefts = $("#leftnums").val().split(",") || [];
+		var rights = $("#rightnums").val().split(",") || [];
+		var mid = parseFloat($("#selfnum").val());
+		for(var i = 0; i < lefts.length; i++){
+			lefts[i] = parseFloat(lefts[i]);
+		}
+		for(var i = 0; i < rights.length; i++){
+			rights[i] = parseFloat(rights[i]);
+		}
+		if(!lefts[0]) lefts = [];
+		if(!rights[0]) rights = [];
+		//setInterval(average_points,100);
+		average_points(lefts,mid,rights);
+	});
+	
+	$("#midpoints_button").click(function(){
+		middlepoints();
+	});
+	
+	$("#clear_button").click(function(){
+		points = [];
+	});
+		
+	setInterval(redraw,10);
 });

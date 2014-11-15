@@ -7,10 +7,19 @@
 	<script src="script.js"></script>
 </head>
 <body>
-	<input id = "leftnums"></input>
-	<input type = "number" value = "1" id = "selfnum"></input>
-	<input id = "rightnums" value = "1"></input>
-	<div>
+	<div id = "weight_inputs_div">
+		<input id = "leftnums"></input>
+		<input type = "number" value = "1" id = "selfnum"></input>
+		<input id = "rightnums" value = "1"></input>
+	</div>
+	<div id = "action_buttons_div">
+		<button id = "clear_button">Clear</button>
+		<button id = "midpoints_button">Add Midpoints</button>
+		<button id = "average_button">Average</button>
+		<input type = "checkbox"> Animate
+	</div>
+	<hr>
+	<div id = "canvas_div" >
 		<canvas id = "canv" width = "800" height = "800" style = "outline: 2px solid black">
 		</canvas>
 	</div>
