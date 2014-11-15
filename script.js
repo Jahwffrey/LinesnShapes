@@ -1,8 +1,8 @@
 var cx;
 var mouse = {x:0,y:0};
 var points = [];
-var width = 400;
-var height = 400;
+var width = 800;
+var height = 800;
 
 function redraw(){
 	if(points.length > 1){
@@ -30,17 +30,33 @@ function middlepoints(){
 	points = points_new;
 }
 
+Number.prototype.mod = function(n) {
+return ((this%n)+n)%n;
+}
+
 function average_points(leftWeights,ownWeight,rightWeights){
 	var num = leftWeights.length + rightWeights.length + 1;
+	leftWeights = leftWeights.reverse();
 	var points_new = [];
 	for(var i = 0; i < points.length;i++){
+		var xavg = 0;
+		var yavg = 0;
+		for(var ii = 0; ii < leftWeights.length; ii++){
+			xavg += points[(i-(ii+1)).mod(points.length)].x*leftWeights[ii]
+			yavg += points[(i-(ii+1)).mod(points.length)].y*leftWeights[ii]
+		}
+		xavg += points[i].x*ownWeight;
+		yavg += points[i].y*ownWeight;
+		for(var ii = 0; ii < rightWeights.length; ii++){
+			xavg += points[(i+(ii+1))%points.length].x*rightWeights[ii]
+			yavg += points[(i+(ii+1))%points.length].y*rightWeights[ii]
+		}
 		points_new.push({
-			x:,
-			y:
+			x: xavg/num,
+			y: yavg/num
 		});
 	}
-	points[points.length-1] = {x:(points[points.length-1].x+temp.x)/2,
-							   y:(points[points.length-1].y+temp.y)/2};
+	points = points_new;
 }
 
 $(document).ready(function(){
@@ -63,15 +79,17 @@ $(document).ready(function(){
 								y:mouse.y})
 					break;
 				case 2:
-					var lefts = $("#leftnums").val().split(",");
-					var rights = $("#leftnums").val().split(",");
-					var mid = parseInt($("#selfnum").val());
+					var lefts = $("#leftnums").val().split(",") || [];
+					var rights = $("#rightnums").val().split(",") || [];
+					var mid = parseFloat($("#selfnum").val());
 					for(var i = 0; i < lefts.length; i++){
-						lefts[i] = parseInt(lefts[i]);
+						lefts[i] = parseFloat(lefts[i]);
 					}
 					for(var i = 0; i < rights.length; i++){
-						rights[i] = parseInt(rights[i]);
+						rights[i] = parseFloat(rights[i]);
 					}
+					if(!lefts[0]) lefts = [];
+					if(!rights[0]) rights = [];
 					//setInterval(average_points,100);
 					average_points(lefts,mid,rights);
 					break;
