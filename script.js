@@ -1,19 +1,37 @@
 var cx;
 var mouse = {x:0,y:0, rightclick: false,xprev: 0,yprev: 0};
 var points = [];
+var anim_points = [];
+var anim_counter = 0;
 var width = 800;
 var height = 800;
-var xshift = 0;
-var yshift = 0;
+var xshift = width/2;
+var yshift = height/2;
 
 function redraw(){
 	cx.clearRect(0,0,width,height);
-	if(points.length > 0){
+	if(anim_points.length === 0){
+		draw_array(points);
+	} else {
+		draw_array(anim_points);
+		for(var i = 0;i < anim_points.length; i++){
+			anim_points[i].x = (anim_points[i].x+((anim_points[i].x + points[i].x)/2))/2;
+			anim_points[i].y = (anim_points[i].y+((anim_points[i].y + points[i].y)/2))/2;
+		}
+		anim_counter-=1;
+		if(anim_counter<1){
+			anim_points = [];
+		}
+	}
+}
+
+function draw_array(array){
+	if(array.length > 0){
 		cx.beginPath();
-		cx.moveTo(points[points.length-1].x+xshift,points[points.length-1].y+yshift);
-		for(var  i = 0; i < points.length; i++){
-			cx.lineTo(points[i].x+xshift,points[i].y+yshift);
-			cx.fillRect(points[i].x+xshift-1,points[i].y+yshift-1,3,3);
+		cx.moveTo(array[array.length-1].x+xshift,array[array.length-1].y+yshift);
+		for(var  i = 0; i < array.length; i++){
+			cx.lineTo(array[i].x+xshift,array[i].y+yshift);
+			cx.fillRect(array[i].x+xshift-1,array[i].y+yshift-1,3,3);
 		}
 		cx.stroke();
 	}
@@ -117,6 +135,10 @@ $(document).ready(function(){
 		if(!lefts[0]) lefts = [];
 		if(!rights[0]) rights = [];
 		//setInterval(average_points,100);
+		if($("#animate_checkbox").prop('checked')===true){
+			anim_points = points;
+			anim_counter = 12;
+		}
 		average_points(lefts,mid,rights);
 	});
 	
@@ -126,7 +148,25 @@ $(document).ready(function(){
 	
 	$("#clear_button").click(function(){
 		points = [];
+		xshift = width/2;
+		yshift = height/2;
 	});
+	$("#center_button").click(function(){
+		xshift = width/2;
+		yshift = height/2;
+	});
+	
+	$("#remove_point_button").click(function(){
+		points.pop();
+	});
+	
+	$("#zoom_out_button").click(function(){
+		average_points([],.8,[]);
+	});
+	$("#zoom_in_button").click(function(){
+		average_points([],1.2,[]);
+	});
+	
 		
 	setInterval(redraw,10);
 });
